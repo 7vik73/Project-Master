@@ -10,6 +10,54 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { getAllTasksQueryFn } from "@/lib/api";
 
+function ProjectCard({ project, workspaceId, handleDelete }: { project: any; workspaceId: string; handleDelete: (id: string) => void }) {
+    const { data: tasksData } = useQuery({
+        queryKey: ["tasks", workspaceId, project._id],
+        queryFn: () => getAllTasksQueryFn({
+            workspaceId: workspaceId || "",
+            projectId: project._id,
+        }),
+    });
+    const taskCount = (tasksData as any)?.tasks?.length ?? 0;
+    const completedCount = (tasksData as any)?.tasks?.filter((t: any) => t.status?.toLowerCase() === "done").length ?? 0;
+    const progress = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
+
+    return (
+        <Link
+            to={`/workspace/${workspaceId}/projects/${project._id}`}
+            className="border rounded p-4 bg-white shadow hover:bg-gray-50 transition block relative"
+        >
+            <div className="absolute top-2 right-2 flex gap-2 z-10">
+                <EditProjectDialog project={project} />
+                <button onClick={e => { e.preventDefault(); handleDelete(project._id); }} title="Delete" className="text-red-500 hover:text-red-700">
+                    &#128465;
+                </button>
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">{project.emoji}</span>
+                <span className="text-lg font-semibold">{project.name}</span>
+            </div>
+            <div className="text-sm text-muted-foreground mb-2">{project.description || "No description"}</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Owner:</span>
+                <span className="font-medium">{project.createdBy?.name || "-"}</span>
+                {project.createdBy?.profilePicture && (
+                    <img src={project.createdBy.profilePicture} alt="Owner" className="h-5 w-5 rounded-full ml-1" />
+                )}
+                <span className="ml-auto">Created: {new Date(project.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">Tasks: {taskCount}</div>
+            <div className="w-full h-2 bg-gray-200 rounded mt-1 overflow-hidden">
+                <div
+                    className="h-2 bg-green-500"
+                    style={{ width: `${progress}%`, transition: 'width 0.3s' }}
+                />
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">Progress: {progress}%</div>
+        </Link>
+    );
+}
+
 const Projects: React.FC = () => {
     const queryClient = useQueryClient();
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -48,44 +96,9 @@ const Projects: React.FC = () => {
                 <div>No projects found in this workspace.</div>
             ) : (
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    {data.projects.map((project: any) => {
-                        const { data: tasksData } = useQuery({
-                            queryKey: ["tasks", workspaceId, project._id],
-                            queryFn: () => getAllTasksQueryFn({
-                                workspaceId: workspaceId || "",
-                                projectId: project._id,
-                            }),
-                        });
-                        const taskCount = (tasksData as any)?.tasks?.length ?? 0;
-                        return (
-                            <Link
-                                key={project._id}
-                                to={`/workspace/${workspaceId}/projects/${project._id}`}
-                                className="border rounded p-4 bg-white shadow hover:bg-gray-50 transition block relative"
-                            >
-                                <div className="absolute top-2 right-2 flex gap-2 z-10">
-                                    <EditProjectDialog project={project} />
-                                    <button onClick={e => { e.preventDefault(); handleDelete(project._id); }} title="Delete" className="text-red-500 hover:text-red-700">
-                                        &#128465;
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-2xl">{project.emoji}</span>
-                                    <span className="text-lg font-semibold">{project.name}</span>
-                                </div>
-                                <div className="text-sm text-muted-foreground mb-2">{project.description || "No description"}</div>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>Owner:</span>
-                                    <span className="font-medium">{project.createdBy?.name || "-"}</span>
-                                    {project.createdBy?.profilePicture && (
-                                        <img src={project.createdBy.profilePicture} alt="Owner" className="h-5 w-5 rounded-full ml-1" />
-                                    )}
-                                    <span className="ml-auto">Created: {new Date(project.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                <div className="mt-2 text-xs text-muted-foreground">Tasks: {taskCount}</div>
-                            </Link>
-                        );
-                    })}
+                    {data.projects.map((project: any) => (
+                        <ProjectCard key={project._id} project={project} workspaceId={workspaceId || ""} handleDelete={handleDelete} />
+                    ))}
                 </div>
             )}
         </div>
