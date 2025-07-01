@@ -16,6 +16,9 @@ interface Message {
     };
     content: string;
     createdAt: string;
+    edited?: boolean;
+    deleted?: boolean;
+    deletedAt?: string;
 }
 
 const Messages = () => {
@@ -27,6 +30,9 @@ const Messages = () => {
     const [content, setContent] = useState("");
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editContent, setEditContent] = useState("");
+    const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
 
     const fetchMessages = async () => {
         setLoading(true);
@@ -68,6 +74,41 @@ const Messages = () => {
         }
     };
 
+    const handleEdit = (msg: Message) => {
+        setEditingMessageId(msg._id);
+        setEditContent(msg.content);
+    };
+
+    const handleEditSave = async (msg: Message) => {
+        if (!editContent.trim()) return;
+        try {
+            await axios.patch(`/api/message/workspaces/${workspaceId}/messages/${msg._id}`, { content: editContent });
+            setEditingMessageId(null);
+            setEditContent("");
+            fetchMessages();
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to edit message");
+        }
+    };
+
+    const handleEditCancel = () => {
+        setEditingMessageId(null);
+        setEditContent("");
+    };
+
+    const handleDelete = async (msg: Message) => {
+        if (!window.confirm("Are you sure you want to delete this message?")) return;
+        setDeletingMessageId(msg._id);
+        try {
+            await axios.delete(`/api/message/workspaces/${workspaceId}/messages/${msg._id}`);
+            fetchMessages();
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to delete message");
+        } finally {
+            setDeletingMessageId(null);
+        }
+    };
+
     return (
         <div className="flex flex-col h-full max-h-[80vh] bg-background rounded-lg border p-4">
             <h2 className="text-xl font-semibold mb-2">Workspace Chat</h2>
@@ -87,12 +128,41 @@ const Messages = () => {
                                     <AvatarFallback>{msg.sender.name?.[0]}</AvatarFallback>
                                 </Avatar>
                             )}
-                            <div className={`max-w-xs rounded-lg px-3 py-2 ${msg.sender._id === user?._id ? "bg-primary text-primary-foreground" : "bg-white dark:bg-gray-800"}`}>
-                                <div className="text-xs font-semibold">
+                            <div className={`max-w-xs rounded-lg px-3 py-2 relative ${msg.sender._id === user?._id ? "bg-primary text-primary-foreground" : "bg-white dark:bg-gray-800"}`}>
+                                <div className="text-xs font-semibold flex items-center gap-2">
                                     {msg.sender._id === user?._id ? "You" : msg.sender.name}
                                     <span className="ml-2 text-[10px] text-muted-foreground">{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                    {msg.edited && !msg.deleted && <span className="text-[10px] text-muted-foreground">(edited)</span>}
                                 </div>
-                                <div className="break-words whitespace-pre-wrap text-sm">{msg.content}</div>
+                                <div className="break-words whitespace-pre-wrap text-sm">
+                                    {msg.deleted ? (
+                                        <span className="italic text-muted-foreground">This message was deleted</span>
+                                    ) : editingMessageId === msg._id ? (
+                                        <form onSubmit={e => { e.preventDefault(); handleEditSave(msg); }} className="flex gap-1 items-center">
+                                            <Input
+                                                value={editContent}
+                                                onChange={e => setEditContent(e.target.value)}
+                                                className="flex-1 h-7 text-xs"
+                                                autoFocus
+                                            />
+                                            <Button type="submit" size="sm" className="h-7 px-2">Save</Button>
+                                            <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={handleEditCancel}>Cancel</Button>
+                                        </form>
+                                    ) : (
+                                        msg.content
+                                    )}
+                                </div>
+                                {/* Edit/Delete menu for own messages */}
+                                {msg.sender._id === user?._id && !msg.deleted && editingMessageId !== msg._id && (
+                                    <div className="absolute top-1 right-1 flex gap-1">
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 p-0" title="Edit" onClick={() => handleEdit(msg)}>
+                                            ✏️
+                                        </Button>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 p-0" title="Delete" onClick={() => handleDelete(msg)} disabled={deletingMessageId === msg._id}>
+                                            🗑️
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))
