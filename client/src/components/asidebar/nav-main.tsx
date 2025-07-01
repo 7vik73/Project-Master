@@ -6,6 +6,7 @@ import {
   Users,
   CheckCircle,
   LayoutDashboard,
+  MessageCircle,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -52,15 +53,19 @@ export function NavMain() {
       url: `/workspace/${workspaceId}/members`,
       icon: Users,
     },
-
+    {
+      title: "Messages",
+      url: `/workspace/${workspaceId}/messages`,
+      icon: MessageCircle,
+    },
     ...(canManageSettings
       ? [
-          {
-            title: "Settings",
-            url: `/workspace/${workspaceId}/settings`,
-            icon: Settings,
-          },
-        ]
+        {
+          title: "Settings",
+          url: `/workspace/${workspaceId}/settings`,
+          icon: Settings,
+        },
+      ]
       : []),
   ];
   return (
