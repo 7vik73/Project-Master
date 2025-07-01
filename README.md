@@ -93,4 +93,4 @@ You are encouraged to customize the project by:
 
 This project is provided for educational and personal use. Please ensure you comply with your institution's academic integrity policies and do not claim work you did not author as your own.
 
-HI
+Hi
