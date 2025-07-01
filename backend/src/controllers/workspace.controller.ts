@@ -24,9 +24,20 @@ import { updateWorkspaceSchema } from "../validation/workspace.validation";
 
 export const createWorkspaceController = asyncHandler(
   async (req: Request, res: Response) => {
-    const body = createWorkspaceSchema.parse(req.body);
-
     const userId = req.user?._id;
+
+    // Check if user is a member of any workspace
+    const userMemberships = await getAllWorkspacesUserIsMemberService(userId);
+
+    if (userMemberships.workspaces.length > 0) {
+      // User is already a member of at least one workspace, check their role in the first workspace
+      const workspaceId = String(userMemberships.workspaces[0]._id);
+      const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+      roleGuard(role, [Permissions.CREATE_WORKSPACE]);
+    }
+    // else: first workspace, allow creation
+
+    const body = createWorkspaceSchema.parse(req.body);
     const { workspace } = await createWorkspaceService(userId, body);
 
     return res.status(HTTPSTATUS.CREATED).json({

@@ -39,7 +39,8 @@ export const RolePermissions: Record<RoleType, Array<PermissionType>> = {
   ],
   MEMBER: [
     Permissions.VIEW_ONLY,
-    Permissions.CREATE_TASK,
+    // If you want members to only view tasks, comment out the next two lines:
+    //Permissions.CREATE_TASK,
     Permissions.EDIT_TASK,
   ],
 };
