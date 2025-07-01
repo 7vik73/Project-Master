@@ -1,124 +1,95 @@
-# 🌟 Advanced MERN B2B Teams Project Management SaaS - *TeamSync*  
+# Project Management SaaS Platform
 
-## 🎥 Watch the Full Video on YouTube  
-**[Subscribe to the Channel](https://tinyurl.com/subcribe-to-techwithEmma)** to stay updated with more exciting projects and tutorials!  
+## Overview
 
----
-
-## ❤️ Support the Channel
-If you love this project and want to see more, consider supporting the channel:
-- Give this repository a ⭐️ on GitHub.
-- **[Buy Me a Coffee](https://www.buymeacoffee.com/techwithemmaofficial)** to help fund more educational content.  
-- Like, share, and subscribe to the channel for more tutorials and updates!
+This is a full-stack B2B project management platform built with the MERN stack (MongoDB, Express, React, Node.js, TypeScript). The application supports multi-tenancy, workspace management, project and task tracking, role-based permissions, and team collaboration features. It is designed for organizations to efficiently manage projects, teams, and workflows.
 
 ---
 
-## 📌 Project Overview  
+## Key Features
 
-Welcome to **TeamSync**, a powerful and scalable multi-tenancy project management system built with **Node.js**, **MongoDB**, and **React**. Designed for real-world B2B needs, this project delivers features like Google Sign-In, workspace management, project tracking, task collaboration, role-based permissions, and more. Perfect for developers aiming to create SaaS-based team collaboration platforms.  
-
----
-
-## 🌟 Key Features  
-
-- 🔐 **Authentication** (Google Sign-In, Email, Password)  
-- 🏢 **Create & Manage Multiple Workspaces**  
-- 📊 **Projects & Epics Management**  
-- ✅ **Tasks** (CRUD, Status, Priority, Assignee)  
-- 👥 **Roles & Permissions** (Owner, Admin, Member)  
-- ✉️ **Invite Members to Workspaces**  
-- 🔍 **Filters & Search** (Status, Priority, AssignedTo)  
-- 📈 **Analytics Dashboard**  
-- 📅 **Pagination & Load More**  
-- 🔒 **Cookie Session Management**  
-- 🚪 **Logout & Session Termination**  
-- 🌱 **Seeding** for Test Data  
-- 💾 **Mongoose Transactions** for Robust Data Integrity  
-- 🌐 **Built with MERN Stack** (Node.js, MongoDB, React, TypeScript)  
+- User authentication (email/password, Google OAuth)
+- Create and manage multiple workspaces
+- Project and task management (CRUD, status, priority, assignee)
+- Role-based permissions (Owner, Admin, Member)
+- Invite members to workspaces
+- Filters and search for tasks and projects
+- Analytics dashboard
+- Pagination and data loading
+- Session management and secure authentication
+- Data seeding for test/demo purposes
+- Built with modern tools: Node.js, React, MongoDB, TypeScript, TailwindCSS
 
 ---
 
-## 🚀 Tools & Technologies  
+## Getting Started
 
-This project leverages the latest tools and frameworks for modern development:  
+### 1. Set Up Environment Variables
 
-- **Node.js**: Scalable backend architecture  
-- **React.js**: Dynamic frontend framework  
-- **MongoDB & Mongoose**: Flexible and scalable database solutions  
-- **Google OAuth**: Seamless Google Sign-In integration  
-- **TypeScript**: For a type-safe codebase  
-- **TailwindCSS & Shadcn UI**: Beautiful, responsive design  
-- **Vite.js**: Lightning-fast frontend development  
+Create a `.env` file in the backend and client directories as needed. Example variables:
 
----
-
-## 🔄 Getting Started  
-
-### 1. Watch the Video  
-Follow along step-by-step by watching the full guide on YouTube.  
-
-### 2. Set Up Environment Variables  
-
-Create a `.env` file in the root of your project and configure these variables:  
-
-```plaintext  
+```plaintext
 PORT=8000
 NODE_ENV=development
-MONGO_URI="mongodb+srv://<username>:<password>@<>.mongodb.net/teamsync_db"  
-
-SESSION_SECRET="session_secret_key"
-
-GOOGLE_CLIENT_ID=<your-google-client-id>  
-GOOGLE_CLIENT_SECRET=<your-google-client-secret>  
+MONGO_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<db_name>"
+SESSION_SECRET="your_session_secret"
+GOOGLE_CLIENT_ID=<your-google-client-id>
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 GOOGLE_CALLBACK_URL=http://localhost:8000/api/auth/google/callback
-
 FRONTEND_ORIGIN=http://localhost:3000
 FRONTEND_GOOGLE_CALLBACK_URL=http://localhost:3000/google/callback
-```  
+```
 
-### 3. Run the Application  
+### 2. Install Dependencies
 
-Install dependencies and start the development server:  
+Install backend dependencies:
+```bash
+cd backend
+npm install
+```
 
-```bash  
-npm install  
-npm run dev  
-```  
+Install frontend dependencies:
+```bash
+cd ../client
+npm install
+```
 
-Access the backend at `http://localhost:8000`.  
+### 3. Run the Application
 
----
+Start the backend server:
+```bash
+cd backend
+npm run dev
+```
 
-## 🌐 Deploying TeamSync  
+Start the frontend development server:
+```bash
+cd ../client
+npm run dev
+```
 
-### 1. Add Environment Variables  
-Add the `.env` variables to your hosting platform (e.g., Vercel).  
-
-### 2. Deploy  
-Deploy your app using your preferred method to make it live.  
-
----
-
-## 📚 Comprehensive Guide  
-
-**🚀 Deepen Your Understanding!**  
-We’ve developed an all-encompassing guide for this project that explains:  
-
-- The architecture and design principles behind TeamSync  
-- Step-by-step breakdowns of each feature  
-- Advanced techniques for implementing seeding, Mongoose transactions, and performance optimizations  
-- Insights into multi-tenancy and role-based permission models  
-- Best practices for building scalable SaaS applications  
-
-This guide ensures you gain a thorough understanding of every concept and feature in TeamSync, empowering you to build similar systems or expand upon this project.  
-
-**💡 Ready to learn more?** Check out the full guide now—**[link in the description!](#)**  
+The backend will be available at `http://localhost:8000` and the frontend at `http://localhost:3000` by default.
 
 ---
 
-### 📺 Like, Share & Subscribe  
+## Deployment
 
-Don’t miss out! **[Subscribe to the Channel](https://tinyurl.com/subcribe-to-techwithEmma)** for more amazing content and exciting projects.  
+- Add your environment variables to your chosen hosting platform (e.g., Vercel, Render, Railway, MongoDB Atlas).
+- Deploy the backend and frontend according to your platform's instructions.
 
-Now, let’s dive into the demo of **TeamSync**! 🚀
+---
+
+## Customization
+
+You are encouraged to customize the project by:
+- Changing the branding, UI, and color scheme
+- Adding or removing features
+- Refactoring code to fit your own style and requirements
+- Writing your own documentation and tests
+
+---
+
+## License
+
+This project is provided for educational and personal use. Please ensure you comply with your institution's academic integrity policies and do not claim work you did not author as your own.
 

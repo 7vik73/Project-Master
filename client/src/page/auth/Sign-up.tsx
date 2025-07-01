@@ -61,9 +61,16 @@ const SignUp = () => {
       },
       onError: (error) => {
         console.log(error);
+        let errorMessage = "An unexpected error occurred. Please try again.";
+        const err = error as any;
+        if (err && err.response && err.response.data && err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err && err.message) {
+          errorMessage = err.message;
+        }
         toast({
           title: "Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       },
