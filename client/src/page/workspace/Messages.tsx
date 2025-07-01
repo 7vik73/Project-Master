@@ -128,7 +128,7 @@ const Messages = () => {
                                     <AvatarFallback>{msg.sender.name?.[0]}</AvatarFallback>
                                 </Avatar>
                             )}
-                            <div className={`max-w-xs rounded-lg px-3 py-2 relative ${msg.sender._id === user?._id ? "bg-primary text-primary-foreground" : "bg-white dark:bg-gray-800"}`}>
+                            <div className={`max-w-xs rounded-lg px-3 py-2 relative ${msg.sender._id === user?._id ? "bg-primary text-primary-foreground pr-16" : "bg-white dark:bg-gray-800"}`}>
                                 <div className="text-xs font-semibold flex items-center gap-2">
                                     {msg.sender._id === user?._id ? "You" : msg.sender.name}
                                     <span className="ml-2 text-[10px] text-muted-foreground">{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
