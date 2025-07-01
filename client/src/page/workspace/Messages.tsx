@@ -5,6 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthContext } from "@/context/auth-provider";
+import { MentionsInput, Mention } from 'react-mentions';
+import useGetWorkspaceMembers from '@/hooks/api/use-get-workspace-members';
+import '@/styles/react-mentions.css';
+
+declare module 'react-mentions';
 
 interface Message {
     _id: string;
@@ -21,6 +26,21 @@ interface Message {
     deletedAt?: string;
 }
 
+function renderMessageWithMentions(content: string) {
+    // This regex matches @[Name](Name) or @[Name](userId)
+    return content.split(/(@\[[^\]]+\]\([^)]+\))/g).map((part, i) => {
+        const match = part.match(/^@\[([^\]]+)\]\([^)]+\)$/);
+        if (match) {
+            return (
+                <span key={i} style={{ background: "#daf4fa", color: "#0077b6", borderRadius: 3, padding: "0 2px" }}>
+                    @{match[1]}
+                </span>
+            );
+        }
+        return part;
+    });
+}
+
 const Messages = () => {
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const { user } = useAuthContext();
@@ -33,6 +53,13 @@ const Messages = () => {
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editContent, setEditContent] = useState("");
     const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+    const { data: membersData } = useGetWorkspaceMembers(workspaceId || "");
+    const mentionUsers = (membersData?.members || [])
+        .filter((m: any) => m.userId._id !== user?._id)
+        .map((m: any) => ({
+            id: m.userId.name,
+            display: m.userId.name
+        }));
 
     const fetchMessages = async () => {
         setLoading(true);
@@ -149,7 +176,7 @@ const Messages = () => {
                                             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={handleEditCancel}>Cancel</Button>
                                         </form>
                                     ) : (
-                                        msg.content
+                                        renderMessageWithMentions(msg.content)
                                     )}
                                 </div>
                                 {/* Edit/Delete menu for own messages */}
@@ -169,14 +196,22 @@ const Messages = () => {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={handleSend} className="flex gap-2 mt-2">
-                <Input
+            <form onSubmit={handleSend} className="flex gap-2 mt-2 w-full">
+                <MentionsInput
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e: any) => setContent(e.target.value)}
+                    className="flex-1 border rounded px-2 py-1 min-h-[40px] bg-white"
                     placeholder="Type a message..."
                     disabled={sending}
-                    className="flex-1"
-                />
+                    style={{ minHeight: 40, width: '100%' }}
+                >
+                    <Mention
+                        trigger="@"
+                        data={mentionUsers}
+                        displayTransform={(id: string, display: string) => `@${display}`}
+                        appendSpaceOnAdd
+                    />
+                </MentionsInput>
                 <Button type="submit" disabled={sending || !content.trim()}>Send</Button>
             </form>
         </div>

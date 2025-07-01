@@ -20,6 +20,7 @@ import memberRoutes from "./routes/member.route";
 import projectRoutes from "./routes/project.route";
 import taskRoutes from "./routes/task.route";
 import messageRoutes from "./routes/message.route";
+import notificationRoutes from "./routes/notification.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -69,6 +70,7 @@ app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 app.use(`${BASE_PATH}/project`, isAuthenticated, projectRoutes);
 app.use(`${BASE_PATH}/task`, isAuthenticated, taskRoutes);
 app.use(`${BASE_PATH}/message`, isAuthenticated, messageRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(errorHandler);
 

@@ -1,0 +1,91 @@
+/* react-mentions default styles (from https://github.com/signavio/react-mentions/blob/master/src/styles.css) */
+.mentions {
+    position: relative;
+    min-height: 40px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.mentions__control {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    font-size: 1rem;
+    background: transparent;
+    padding: 0 8px;
+    height: 40px;
+}
+
+.mentions__highlighter {
+    position: absolute;
+    border: 0;
+    color: transparent;
+    background: transparent;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 40px;
+    padding: 0;
+    margin: 0;
+}
+
+.mentions__input,
+.mentions__input textarea {
+    min-height: 40px;
+    height: 40px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    display: block;
+}
+
+.mentions__input::placeholder,
+.mentions__input textarea::placeholder {
+    color: #a0aec0;
+    opacity: 1;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.mentions__suggestions {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    z-index: 100;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mentions__suggestions__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mentions__suggestions__item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.mentions__suggestions__item--focused {
+    background-color: #f5f5f5;
+}
+
+.mentions__mention {
+    background-color: #daf4fa;
+    color: #0077b6;
+    border-radius: 3px;
+    padding: 0 2px;
+}
