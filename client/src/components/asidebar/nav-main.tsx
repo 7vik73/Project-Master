@@ -58,6 +58,11 @@ export function NavMain() {
       url: `/workspace/${workspaceId}/messages`,
       icon: MessageCircle,
     },
+    {
+      title: "Projects",
+      url: `/workspace/${workspaceId}/projects`,
+      icon: LayoutDashboard,
+    },
     ...(canManageSettings
       ? [
         {
