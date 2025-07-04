@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
-import session from "cookie-session";
+import session = require("express-session");
 import { config } from "./config/app.config";
 import connectDatabase from "./config/database.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
@@ -31,13 +31,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    name: "session",
-    keys: [config.SESSION_SECRET],
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: config.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "lax",
-  })
+    secret: config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+      secure: config.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  }) as any
 );
 
 app.use(passport.initialize());
