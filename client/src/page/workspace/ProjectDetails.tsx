@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import ProjectAnalytics from "@/components/workspace/project/project-analytics";
 import ProjectHeader from "@/components/workspace/project/project-header";

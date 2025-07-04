@@ -208,7 +208,7 @@ const Messages = () => {
                     <Mention
                         trigger="@"
                         data={mentionUsers}
-                        displayTransform={(id: string, display: string) => `@${display}`}
+                        displayTransform={(_id: string, display: string) => `@${display}`}
                         appendSpaceOnAdd
                     />
                 </MentionsInput>
