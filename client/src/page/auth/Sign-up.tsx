@@ -60,7 +60,6 @@ const SignUp = () => {
         navigate("/");
       },
       onError: (error) => {
-        console.log(error);
         let errorMessage = "An unexpected error occurred. Please try again.";
         const err = error as any;
         if (err && err.response && err.response.data && err.response.data.message) {
