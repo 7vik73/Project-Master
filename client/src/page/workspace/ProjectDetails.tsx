@@ -6,7 +6,8 @@ import ProjectHeader from "@/components/workspace/project/project-header";
 import TaskTable from "@/components/workspace/task/task-table";
 
 const ProjectDetails: React.FC = () => {
-  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  // No need to destructure if not used
+  // const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
   return (
     <div className="w-full space-y-6 py-4 md:pt-3">
       <ProjectHeader />
