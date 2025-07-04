@@ -33,8 +33,10 @@ export const loginMutationFn = async (
   return response.data;
 };
 
-export const registerMutationFn = async (data: registerType) =>
-  await API.post("/api/auth/register", data);
+export const registerMutationFn = async (data: registerType) => {
+  const response = await API.post("/api/auth/register", data);
+  return response.data;
+};
 
 export const logoutMutationFn = async () => await API.post("/api/auth/logout");
 
