@@ -21,6 +21,8 @@ import projectRoutes from "./routes/project.route";
 import taskRoutes from "./routes/task.route";
 import messageRoutes from "./routes/message.route";
 import notificationRoutes from "./routes/notification.route";
+import { createClient } from "redis";
+import { RedisStore } from "connect-redis";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -29,8 +31,16 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+const redisClient = createClient({
+  url: process.env.REDIS_URL || "redis://localhost:6379"
+});
+redisClient.connect().catch(console.error);
+
+const store = new RedisStore({ client: redisClient });
+
 app.use(
   session({
+    store,
     secret: config.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,

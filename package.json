@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@types/express-session": "^1.18.2",
-    "express-session": "^1.18.1"
+    "connect-redis": "^9.0.0",
+    "express-session": "^1.18.1",
+    "redis": "^5.5.6"
   }
 }
