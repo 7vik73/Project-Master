@@ -260,3 +260,80 @@ export const deleteTaskMutationFn = async ({
   );
   return response.data;
 };
+
+//*******MESSAGES ********************************
+//************************* */
+
+export const getWorkspaceMessagesQueryFn = async (
+  workspaceId: string
+): Promise<{
+  message: string;
+  data: Array<{
+    _id: string;
+    sender: {
+      _id: string;
+      name: string;
+      email: string;
+      profilePicture?: string;
+    };
+    content: string;
+    createdAt: string;
+    edited?: boolean;
+    deleted?: boolean;
+    deletedAt?: string;
+  }>;
+}> => {
+  const response = await API.get(`/message/workspaces/${workspaceId}/messages`);
+  return response.data;
+};
+
+export const sendMessageMutationFn = async ({
+  workspaceId,
+  content,
+}: {
+  workspaceId: string;
+  content: string;
+}): Promise<{
+  message: string;
+  data: any;
+}> => {
+  const response = await API.post(`/message/workspaces/${workspaceId}/messages`, {
+    content,
+  });
+  return response.data;
+};
+
+export const editMessageMutationFn = async ({
+  workspaceId,
+  messageId,
+  content,
+}: {
+  workspaceId: string;
+  messageId: string;
+  content: string;
+}): Promise<{
+  message: string;
+  data: any;
+}> => {
+  const response = await API.patch(
+    `/message/workspaces/${workspaceId}/messages/${messageId}`,
+    { content }
+  );
+  return response.data;
+};
+
+export const deleteMessageMutationFn = async ({
+  workspaceId,
+  messageId,
+}: {
+  workspaceId: string;
+  messageId: string;
+}): Promise<{
+  message: string;
+  data: any;
+}> => {
+  const response = await API.delete(
+    `/message/workspaces/${workspaceId}/messages/${messageId}`
+  );
+  return response.data;
+};

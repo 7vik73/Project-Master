@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "@/lib/axios-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthContext } from "@/context/auth-provider";
 import { MentionsInput, Mention } from 'react-mentions';
 import useGetWorkspaceMembers from '@/hooks/api/use-get-workspace-members';
+import {
+    getWorkspaceMessagesQueryFn,
+    sendMessageMutationFn,
+    editMessageMutationFn,
+    deleteMessageMutationFn
+} from '@/lib/api';
 import '@/styles/react-mentions.css';
 
 declare module 'react-mentions';
@@ -26,20 +31,31 @@ interface Message {
     deletedAt?: string;
 }
 
-function renderMessageWithMentions(content: string) {
-    // This regex matches @[Name](Name) or @[Name](userId)
-    return content.split(/(@\[[^\]]+\]\([^)]+\))/g).map((part, i) => {
-        const match = part.match(/^@\[([^\]]+)\]\([^)]+\)$/);
-        if (match) {
-            return (
-                <span key={i} style={{ background: "#daf4fa", color: "#0077b6", borderRadius: 3, padding: "0 2px" }}>
-                    @{match[1]}
-                </span>
-            );
+const renderMessageWithMentions = (content: string) => {
+    const mentionRegex = /@\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionRegex.exec(content)) !== null) {
+        // Add text before the mention
+        if (match.index > lastIndex) {
+            parts.push(content.slice(lastIndex, match.index));
         }
-        return part;
-    });
-}
+        // Add the mention
+        parts.push(
+            <span key={match.index} className="bg-blue-100 text-blue-800 px-1 rounded">
+                @{match[1]}
+            </span>
+        );
+        lastIndex = match.index + match[0].length;
+    }
+    // Add remaining text
+    if (lastIndex < content.length) {
+        parts.push(content.slice(lastIndex));
+    }
+    return parts.length > 0 ? parts : content;
+};
 
 const Messages = () => {
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -62,11 +78,13 @@ const Messages = () => {
         }));
 
     const fetchMessages = async () => {
+        if (!workspaceId) return;
+
         setLoading(true);
         setError("");
         try {
-            const res = await axios.get(`/api/message/workspaces/${workspaceId}/messages`);
-            setMessages(res.data.data);
+            const response = await getWorkspaceMessagesQueryFn(workspaceId);
+            setMessages(response.data);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to load messages");
         } finally {
@@ -88,10 +106,11 @@ const Messages = () => {
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!content.trim()) return;
+        if (!content.trim() || !workspaceId) return;
+
         setSending(true);
         try {
-            await axios.post(`/api/message/workspaces/${workspaceId}/messages`, { content });
+            await sendMessageMutationFn({ workspaceId, content });
             setContent("");
             fetchMessages();
         } catch (err: any) {
@@ -107,9 +126,14 @@ const Messages = () => {
     };
 
     const handleEditSave = async (msg: Message) => {
-        if (!editContent.trim()) return;
+        if (!editContent.trim() || !workspaceId) return;
+
         try {
-            await axios.patch(`/api/message/workspaces/${workspaceId}/messages/${msg._id}`, { content: editContent });
+            await editMessageMutationFn({
+                workspaceId,
+                messageId: msg._id,
+                content: editContent
+            });
             setEditingMessageId(null);
             setEditContent("");
             fetchMessages();
@@ -124,10 +148,11 @@ const Messages = () => {
     };
 
     const handleDelete = async (msg: Message) => {
-        if (!window.confirm("Are you sure you want to delete this message?")) return;
+        if (!window.confirm("Are you sure you want to delete this message?") || !workspaceId) return;
+
         setDeletingMessageId(msg._id);
         try {
-            await axios.delete(`/api/message/workspaces/${workspaceId}/messages/${msg._id}`);
+            await deleteMessageMutationFn({ workspaceId, messageId: msg._id });
             fetchMessages();
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to delete message");

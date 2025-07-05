@@ -115,7 +115,7 @@ app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 app.use(`${BASE_PATH}/project`, isAuthenticated, projectRoutes);
 app.use(`${BASE_PATH}/task`, isAuthenticated, taskRoutes);
 app.use(`${BASE_PATH}/message`, isAuthenticated, messageRoutes);
-app.use("/api/notifications", notificationRoutes);
+app.use(`${BASE_PATH}/notifications`, isAuthenticated, notificationRoutes);
 
 app.use(errorHandler);
 
