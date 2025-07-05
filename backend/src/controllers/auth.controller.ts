@@ -3,7 +3,8 @@ import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { config } from "../config/app.config";
 import { registerSchema } from "../validation/auth.validation";
 import { HTTPSTATUS } from "../config/http.config";
-import { registerUserService } from "../services/auth.service";
+import { registerUserServiceSimple } from "../services/auth.service.simple";
+import { SessionManager } from "../utils/session-manager";
 import passport from "passport";
 
 export const googleLoginCallback = asyncHandler(
@@ -28,7 +29,7 @@ export const registerUserController = asyncHandler(
       ...req.body,
     });
 
-    await registerUserService(body);
+    await registerUserServiceSimple(body);
 
     return res.status(HTTPSTATUS.CREATED).json({
       message: "User created successfully",
@@ -60,6 +61,9 @@ export const loginController = asyncHandler(
             return next(err);
           }
 
+          // Extend session on login
+          SessionManager.extendSession(req);
+
           return res.status(HTTPSTATUS.OK).json({
             message: "Logged in successfully",
             user,
@@ -72,26 +76,28 @@ export const loginController = asyncHandler(
 
 export const logOutController = asyncHandler(
   async (req: Request, res: Response) => {
-    req.logout((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res
-          .status(HTTPSTATUS.INTERNAL_SERVER_ERROR)
-          .json({ error: "Failed to log out" });
-      }
-    });
+    try {
+      // Use session manager to clear session
+      await SessionManager.clearSession(req, res);
 
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Session destruction error:", err);
-        return res
-          .status(HTTPSTATUS.INTERNAL_SERVER_ERROR)
-          .json({ error: "Failed to destroy session" });
-      }
-    });
+      // Logout from passport
+      req.logout((err) => {
+        if (err) {
+          console.error("Logout error:", err);
+          return res
+            .status(HTTPSTATUS.INTERNAL_SERVER_ERROR)
+            .json({ error: "Failed to log out" });
+        }
 
-    return res
-      .status(HTTPSTATUS.OK)
-      .json({ message: "Logged out successfully" });
+        return res
+          .status(HTTPSTATUS.OK)
+          .json({ message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Session clear error:", error);
+      return res
+        .status(HTTPSTATUS.INTERNAL_SERVER_ERROR)
+        .json({ error: "Failed to clear session" });
+    }
   }
 );
