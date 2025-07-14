@@ -3,6 +3,7 @@ import MemberModel from "../models/member.model";
 import NotificationModel from "../models/notification.model";
 import UserModel from "../models/user.model";
 import { NotFoundException, UnauthorizedException } from "../utils/appError";
+import mongoose from "mongoose";
 
 export const sendMessageService = async (userId: string, workspaceId: string, content: string) => {
     // Check if user is a member of the workspace
@@ -15,7 +16,7 @@ export const sendMessageService = async (userId: string, workspaceId: string, co
     const mentionedUserIds: string[] = [];
     let match;
     while ((match = mentionRegex.exec(content)) !== null) {
-        if (match[1] && !mentionedUserIds.includes(match[1]) && match[1] !== String(userId)) {
+        if (match[1] && mongoose.Types.ObjectId.isValid(match[1]) && !mentionedUserIds.includes(match[1]) && match[1] !== String(userId)) {
             mentionedUserIds.push(match[1]);
         }
     }
@@ -24,26 +25,34 @@ export const sendMessageService = async (userId: string, workspaceId: string, co
     // --- Notification Logic ---
     if (mentionedUserIds.length > 0) {
         for (const mentionedId of mentionedUserIds) {
-            await NotificationModel.create({
-                recipient: mentionedId,
-                workspace: workspaceId,
-                message: message._id,
-                type: "mention",
-                read: false,
-            });
+            try {
+                await NotificationModel.create({
+                    recipient: mentionedId,
+                    workspace: workspaceId,
+                    message: message._id,
+                    type: "mention",
+                    read: false,
+                });
+            } catch (err) {
+                console.error(`Failed to create mention notification for userId ${mentionedId}:`, err);
+            }
         }
     } else {
         // No mentions, notify all workspace members except sender
         const members = await MemberModel.find({ workspaceId });
         for (const m of members) {
             if (String(m.userId) !== String(userId)) {
-                await NotificationModel.create({
-                    recipient: m.userId,
-                    workspace: workspaceId,
-                    message: message._id,
-                    type: "general",
-                    read: false,
-                });
+                try {
+                    await NotificationModel.create({
+                        recipient: m.userId,
+                        workspace: workspaceId,
+                        message: message._id,
+                        type: "general",
+                        read: false,
+                    });
+                } catch (err) {
+                    console.error(`Failed to create general notification for userId ${m.userId}:`, err);
+                }
             }
         }
     }

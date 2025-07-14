@@ -27,7 +27,7 @@ const Header = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("/api/notifications");
+        const res = await axios.get("/notifications");
         const notifications = res.data.data || [];
         setNotifications(notifications);
         setUnreadCount(notifications.filter((n: any) => !n.read).length);
@@ -44,7 +44,7 @@ const Header = () => {
   // Mark all as read when dropdown opens
   useEffect(() => {
     if (dropdownOpen && notifications.some((n) => !n.read)) {
-      axios.patch("/api/notifications/read-all").then(() => {
+      axios.patch("/notifications/read-all").then(() => {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
       });
