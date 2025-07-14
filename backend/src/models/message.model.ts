@@ -8,6 +8,7 @@ export interface MessageDocument extends Document {
     edited?: boolean;
     deleted?: boolean;
     deletedAt?: Date;
+    mentions?: mongoose.Types.ObjectId[];
 }
 
 const messageSchema = new Schema<MessageDocument>(
@@ -23,6 +24,7 @@ const messageSchema = new Schema<MessageDocument>(
         edited: { type: Boolean, default: false },
         deleted: { type: Boolean, default: false },
         deletedAt: { type: Date },
+        mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
     {
         timestamps: { createdAt: true, updatedAt: false },

@@ -10,31 +10,29 @@ export const sendMessageService = async (userId: string, workspaceId: string, co
     if (!member) {
         throw new UnauthorizedException("You are not a member of this workspace");
     }
-    const message = await MessageModel.create({ sender: userId, workspace: workspaceId, content });
-
-    // --- Notification Logic ---
-    // Find mentions in the form @name (split by space, punctuation, etc.)
-    const mentionRegex = /@([\w\-]+)/g;
-    const mentionedNames = Array.from(content.matchAll(mentionRegex)).map(match => match[1]);
-    let notifiedUserIds: string[] = [];
-    if (mentionedNames.length > 0) {
-        // Find users in the workspace with these names
-        const mentionedMembers = await MemberModel.find({ workspaceId }).populate("userId", "name");
-        for (const name of mentionedNames) {
-            const member = mentionedMembers.find(m => m.userId && (m.userId as any).name && (m.userId as any).name.replace(/\s+/g, '').toLowerCase() === name.replace(/\s+/g, '').toLowerCase());
-            if (member && String(member.userId._id) !== String(userId)) {
-                await NotificationModel.create({
-                    recipient: member.userId._id,
-                    workspace: workspaceId,
-                    message: message._id,
-                    type: "mention",
-                    read: false,
-                });
-                notifiedUserIds.push(String(member.userId._id));
-            }
+    // Extract mentions in the form @[Name](userId)
+    const mentionRegex = /@\[[^\]]+\]\(([^)]+)\)/g;
+    const mentionedUserIds: string[] = [];
+    let match;
+    while ((match = mentionRegex.exec(content)) !== null) {
+        if (match[1] && !mentionedUserIds.includes(match[1]) && match[1] !== String(userId)) {
+            mentionedUserIds.push(match[1]);
         }
     }
-    if (notifiedUserIds.length === 0) {
+    const message = await MessageModel.create({ sender: userId, workspace: workspaceId, content, mentions: mentionedUserIds });
+
+    // --- Notification Logic ---
+    if (mentionedUserIds.length > 0) {
+        for (const mentionedId of mentionedUserIds) {
+            await NotificationModel.create({
+                recipient: mentionedId,
+                workspace: workspaceId,
+                message: message._id,
+                type: "mention",
+                read: false,
+            });
+        }
+    } else {
         // No mentions, notify all workspace members except sender
         const members = await MemberModel.find({ workspaceId });
         for (const m of members) {
@@ -63,14 +61,12 @@ export const getWorkspaceMessagesService = async (userId: string, workspaceId: s
     const allMessages = await MessageModel.find({ workspace: workspaceId })
         .populate("sender", "name email avatar")
         .sort({ createdAt: 1 });
-    // Filter messages: if a message contains a mention, only show to sender or mentioned user
+    // Filter messages: if a message has mentions, only show to sender or mentioned user
     const filteredMessages = allMessages.filter((msg: any) => {
-        const mentionRegex = /@\[([^\]]+)\]\(([^)]+)\)/g;
-        const mentions = Array.from((msg.content || "").matchAll(mentionRegex)).map(match => (match as string[])[1]);
-        if (mentions.length === 0) return true; // No mentions, show to all
+        if (!msg.mentions || msg.mentions.length === 0) return true; // No mentions, show to all
         if (String(msg.sender._id) === String(userId)) return true; // Sender always sees
-        // Check if user is mentioned by name
-        return mentions.some(name => name === ((member.userId as any).name));
+        // Check if user is mentioned by userId
+        return msg.mentions.map((id: any) => String(id)).includes(String(userId));
     });
     return { messages: filteredMessages };
 };
